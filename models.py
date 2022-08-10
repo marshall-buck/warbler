@@ -171,12 +171,23 @@ class Message(db.Model):
         nullable=False,
     )
 
+    likers = db.relationship(
+        'User',
+        secondary="likes",
+        backref="liked_messages",
+    )
+
 """
 Join table between users and messages called likes
 Will contain 2 foreign keys: user_id and message_id.
 Each row of the table represents the relationship between one user and one message.
 """
-class Like
+class Like(db.Model):
+    """Mapping of a a liked message to an user"""
+    __tablename__ = "likes"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('messages.id'), primary_key=True)
 
 
 

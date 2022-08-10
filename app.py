@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
 from forms import UserAddForm, LoginForm, MessageForm, OnlyCsrfForm, EditUserProfile
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Like
 
 load_dotenv()
 
@@ -344,6 +344,23 @@ def delete_message(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+
+"""Places where messages appear:
+- homepage
+- another user's homepage
+
+
+
+"""
+
+
+
+
+
+
+
+
 
 
 ##############################################################################
