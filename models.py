@@ -16,8 +16,8 @@ class Follows(db.Model):
     """Connection of a follower <-> followed_user."""
 
     __tablename__ = 'follows'
-    #TODO: ondelete what does it do?
-    # composite primary key? 
+    #ondelete casacade can be dangerous (deleting foreign key will delete the table with primary key)
+    # composite primary key cause Kadeem can't follow Marshall twice
     user_being_followed_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="cascade"),
@@ -170,6 +170,25 @@ class Message(db.Model):
         db.ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False,
     )
+
+"""
+Join table between users and messages called likes
+Will contain 2 foreign keys: user_id and message_id.
+Each row of the table represents the relationship between one user and one message.
+
+
+"""
+
+
+
+
+
+
+
+
+
+
+
 
 
 def connect_db(app):

@@ -31,16 +31,20 @@ connect_db(app)
 ##############################################################################
 # User signup/login/logout
 
-@app.before_request  # runs before every single request
+@app.before_request  # runs before every single request, Flask run each of them in order every route
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
-        g.csrf_form = OnlyCsrfForm()
+
 
     else:
         g.user = None
+
+@app.before_request
+def add_form_to_g():
+    g.csrf_form = OnlyCsrfForm()
 
 
 def do_login(user):
@@ -352,10 +356,9 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
     """
-    #TODO: is there a more pythonic way for this?
-    user_id_list = [user.id for user in g.user.following]
-    user_id_list.append(g.user.id)
     if g.user:
+        user_id_list = [user.id for user in g.user.following]
+        user_id_list.append(g.user.id) # can use plus(+) (g.user.id) on 361
         messages = (Message
                     .query
                     .filter(Message.user_id.in_(user_id_list))
