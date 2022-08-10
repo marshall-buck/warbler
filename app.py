@@ -232,39 +232,29 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    """There are buttons throughout the site for editing your profile, but this is unimplemented.
-
-        It should ensure a user is logged on
-        (you can see how this is done in other routes)
-        It should show a form with the following:
-        username
-        email
-        image_url
-        header_image_url
-        bio
-
-        password [see below]
-        It should check that that password is the valid password for the user—if not,
-        it should flash an error and re-present the form with the data entered so far reappearing.
-        It should edit the user for all of these fields except password
-
-        (ie, this is not an area where users can change their
-        passwords–the password is only for checking if it is the current correct password.
-        On success, it should redirect to the user detail page."""
-
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    form = EditUserProfile()
+    form = EditUserProfile(obj=g.user)
 
     if form.validate_on_submit():
-        g.user.username = form.username.data
-        g.user.email = form.email.data
-        g.user.password = form.password.data
-        g.user.image_url = form.image_url.data
-        g.user.header_image_url = form.header_image_url.data
-        g.user.bio = form.bio.data
+        if User.authenticate(g.user.username, form.password.data):
+            g.user.username = form.username.data
+            g.user.email = form.email.data
+            g.user.image_url = form.image_url.data
+            g.user.header_image_url = form.header_image_url.data
+            g.user.bio = form.bio.data
+
+            db.session.commit()
+
+            return redirect(f'/users/{g.user.id}')
+
+        else:
+            form.password.errors = ["Invalid password."]
+            return render_template('users/edit.html', form=form)
+
+    return render_template('users/edit.html', form=form)
 
 
 @app.post('/users/delete')
