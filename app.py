@@ -118,7 +118,6 @@ def login():
 @app.post('/logout')
 def logout():
     """Handle logout of user and redirect to homepage."""
-    # TODO: what's this g.csrf...?
     form = g.csrf_form
 
     # IMPLEMENT THIS AND FIX BUG
@@ -240,13 +239,21 @@ def profile():
 
     if form.validate_on_submit():
         if User.authenticate(g.user.username, form.password.data):
-            g.user.username = form.username.data
-            g.user.email = form.email.data
-            g.user.image_url = form.image_url.data
-            g.user.header_image_url = form.header_image_url.data
-            g.user.bio = form.bio.data
+            try:
+                g.user.username = form.username.data
+                g.user.email = form.email.data
+                g.user.image_url = form.image_url.data
+                g.user.header_image_url = form.header_image_url.data
+                g.user.bio = form.bio.data
 
-            db.session.commit()
+                db.session.commit()
+
+            except IntegrityError:
+                flash("Username already taken", 'danger')
+                #TODO: clarification on rollback
+                db.session.rollback()
+                return render_template('users/edit.html', form=form)
+
 
             return redirect(f'/users/{g.user.id}')
 
@@ -255,6 +262,7 @@ def profile():
             return render_template('users/edit.html', form=form)
 
     return render_template('users/edit.html', form=form)
+
 
 
 @app.post('/users/delete')
