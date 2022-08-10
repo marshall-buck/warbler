@@ -3,9 +3,9 @@
 {% block content %}
 
 <div id="warbler-hero" class="full-width">
-  <img src="{{user.header_image_url}}" alt="" class="img-fluid">
+  <img src="{{g.user.header_image_url}}" alt="" class="img-fluid">
 </div>
-<img src="{{ user.image_url }}" alt="Image for {{ user.username }}" id="profile-avatar">
+<img src="{{ g.user.image_url }}" alt="Image for {{ g.user.username }}" id="profile-avatar">
 <div class="row full-width">
   <div class="container" style="max-width: 1300px;">
     <div class="row justify-content-end">
@@ -15,8 +15,8 @@
           <li class="stat">
             <p class="small">Messages</p>
             <h4>
-              <a href="/users/{{ user.id }}">
-                {{ user.messages | length }}
+              <a href="/users/{{ g.user.id }}">
+                {{ g.user.messages | length }}
               </a>
             </h4>
           </li>
@@ -25,7 +25,7 @@
             <p class="small">Following</p>
             <h4>
               <a href="/users/{{ user.id }}/following">
-                {{ user.following | length }}
+                {{ g.user.following | length }}
               </a>
             </h4>
           </li>
@@ -34,7 +34,7 @@
             <p class="small">Followers</p>
             <h4>
               <a href="/users/{{ user.id }}/followers">
-                {{ user.followers | length }}
+                {{ g.user.followers | length }}
               </a>
             </h4>
           </li>
@@ -75,11 +75,11 @@
 
 <div class="row">
   <div class="col-sm-3">
-    <h4 id="sidebar-username">@{{ user.username }}</h4>
-    <p>{{user.bio}}</p>
+    <h4 id="sidebar-username">@{{ g.user.username }}</h4>
+    <p>{{g.user.bio}}</p>
     <p class="user-location">
       <span class="bi bi-map"></span>
-      {{user.location}}
+      {{g.user.location}}
     </p>
   </div>
 

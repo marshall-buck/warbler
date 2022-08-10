@@ -30,6 +30,7 @@ class EditUserProfile(FlaskForm):
     password = PasswordField('Password', validators=[Length(min=6)])
     image_url = StringField('(Optional) Image URL')
     header_image_url = StringField('(Optional) Header Image URL')
+    location = StringField('(Optional) Location')
     bio = TextAreaField('(Optional) Bio')
 
 

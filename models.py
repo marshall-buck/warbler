@@ -175,10 +175,8 @@ class Message(db.Model):
 Join table between users and messages called likes
 Will contain 2 foreign keys: user_id and message_id.
 Each row of the table represents the relationship between one user and one message.
-
-
 """
-
+class Like
 
 
 
