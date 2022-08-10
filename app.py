@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
-from forms import UserAddForm, LoginForm, MessageForm, OnlyCsrfForm
+from forms import UserAddForm, LoginForm, MessageForm, OnlyCsrfForm, EditUserProfile
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -31,7 +31,7 @@ connect_db(app)
 ##############################################################################
 # User signup/login/logout
 
-@app.before_request #runs before every single request
+@app.before_request  # runs before every single request
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
@@ -118,9 +118,8 @@ def login():
 @app.post('/logout')
 def logout():
     """Handle logout of user and redirect to homepage."""
-    #TODO: what's this g.csrf...?
+    # TODO: what's this g.csrf...?
     form = g.csrf_form
-
 
     # IMPLEMENT THIS AND FIX BUG
     # DO NOT CHANGE METHOD ON ROUTE
@@ -130,7 +129,6 @@ def logout():
         return redirect("/login")
     else:
         raise Unauthorized()
-
 
 
 ##############################################################################
@@ -234,7 +232,39 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    """There are buttons throughout the site for editing your profile, but this is unimplemented.
+
+        It should ensure a user is logged on
+        (you can see how this is done in other routes)
+        It should show a form with the following:
+        username
+        email
+        image_url
+        header_image_url
+        bio
+
+        password [see below]
+        It should check that that password is the valid password for the user—if not,
+        it should flash an error and re-present the form with the data entered so far reappearing.
+        It should edit the user for all of these fields except password
+
+        (ie, this is not an area where users can change their
+        passwords–the password is only for checking if it is the current correct password.
+        On success, it should redirect to the user detail page."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = EditUserProfile()
+
+    if form.validate_on_submit():
+        g.user.username = form.username.data
+        g.user.email = form.email.data
+        g.user.password = form.password.data
+        g.user.image_url = form.image_url.data
+        g.user.header_image_url = form.header_image_url.data
+        g.user.bio = form.bio.data
 
 
 @app.post('/users/delete')
