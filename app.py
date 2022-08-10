@@ -4,8 +4,9 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import Unauthorized
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, OnlyCsrfForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -30,13 +31,13 @@ connect_db(app)
 ##############################################################################
 # User signup/login/logout
 
-
-@app.before_request
+@app.before_request #runs before every single request
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
+        g.csrf_form = OnlyCsrfForm()
 
     else:
         g.user = None
@@ -117,11 +118,19 @@ def login():
 @app.post('/logout')
 def logout():
     """Handle logout of user and redirect to homepage."""
-
+    #TODO: what's this g.csrf...?
     form = g.csrf_form
+
 
     # IMPLEMENT THIS AND FIX BUG
     # DO NOT CHANGE METHOD ON ROUTE
+    if form.validate_on_submit():
+        do_logout()
+        flash("You're logged out.")
+        return redirect("/login")
+    else:
+        raise Unauthorized()
+
 
 
 ##############################################################################
@@ -133,7 +142,7 @@ def list_users():
 
     Can take a 'q' param in querystring to search by that username.
     """
-
+# gi good for putting sth on it to use it in request
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")

@@ -16,7 +16,8 @@ class Follows(db.Model):
     """Connection of a follower <-> followed_user."""
 
     __tablename__ = 'follows'
-
+    #TODO: ondelete what does it do?
+    # composite primary key? 
     user_being_followed_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="cascade"),
@@ -163,7 +164,7 @@ class Message(db.Model):
         nullable=False,
         default=datetime.utcnow,
     )
-
+    #TODO: ondelete cascade here too
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete='CASCADE'),
