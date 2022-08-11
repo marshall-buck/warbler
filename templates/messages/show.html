@@ -46,12 +46,14 @@
           {% if g.user.id != message.user.id %}
           {%if message.is_liked_by_user(g.user)%}
           <form action="/unlike/{{message.id}}" method="POST">
+            {{ g.csrf_form.hidden_tag() }}
             <button class="btn btn-outline-primary btn-sm" type="submit">Unlike</button>
           </form>
 
           {%else%}
 
           <form action="/like/{{message.id}}" method="POST">
+            {{ g.csrf_form.hidden_tag() }}
             <button class="btn btn-outline-primary btn-sm" type="submit">Like</button>
           </form>
           {%endif%}

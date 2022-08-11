@@ -167,8 +167,7 @@ class Message(db.Model):
     # TODO: on delete cascade here too
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id', ondelete='CASCADE'),
-        nullable=False,
+        db.ForeignKey('users.id', ondelete='CASCADE')
     )
 
     likers = db.relationship(

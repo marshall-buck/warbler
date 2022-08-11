@@ -275,6 +275,19 @@ def delete_user():
     """Delete user.
 
     Redirect to signup page.
+
+    method app.route(get, method)
+    form.validate_on_submit
+
+
+
+
+
+
+
+
+
+
     """
 
     if not g.user:
@@ -333,6 +346,7 @@ def delete_message(message_id):
 
     Check that this message was written by the current user.
     Redirect to user page on success.
+    TODO: CSRF
     """
 
     if not g.user:
@@ -358,13 +372,14 @@ def delete_message(message_id):
 @app.post("/like/<int:message_id>")
 def like_message(message_id):
     """Like a message
+    TODO: CSRF
     """
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
     message = Message.query.get_or_404(message_id)
-
+    #check if message is already liked
     g.user.liked_messages.append(message)
     db.session.commit()
 
@@ -374,6 +389,8 @@ def like_message(message_id):
 @app.post("/unlike/<int:message_id>")
 def unlike_message(message_id):
     """UnLike a message
+
+    TODO: CSRF
     """
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -415,7 +432,7 @@ def homepage():
         user_id_list.append(g.user.id)  # can use plus(+) (g.user.id) on 361
         messages = (Message
                     .query
-                    # .filter(Message.user_id.in_(user_id_list))
+                    .filter(Message.user_id.in_(user_id_list))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
