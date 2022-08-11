@@ -15,8 +15,8 @@
           <li class="stat">
             <p class="small">Messages</p>
             <h4>
-              <a href="/users/{{ g.user.id }}">
-                {{ g.user.messages | length }}
+              <a href="/users/{{ user.id }}">
+                {{ user.messages | length }}
               </a>
             </h4>
           </li>
@@ -25,7 +25,7 @@
             <p class="small">Following</p>
             <h4>
               <a href="/users/{{ user.id }}/following">
-                {{ g.user.following | length }}
+                {{ user.following | length }}
               </a>
             </h4>
           </li>
@@ -34,7 +34,7 @@
             <p class="small">Followers</p>
             <h4>
               <a href="/users/{{ user.id }}/followers">
-                {{ g.user.followers | length }}
+                {{ user.followers | length }}
               </a>
             </h4>
           </li>
@@ -42,7 +42,7 @@
             <p class="small">Likes</p>
             <h4>
               <a href="/users/{{ user.id }}/likes">
-                {{g.user.liked_messages | length}}
+                {{user.liked_messages | length}}
               </a>
             </h4>
 

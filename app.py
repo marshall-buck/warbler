@@ -387,6 +387,17 @@ def unlike_message(message_id):
 
     return render_template('messages/show.html', message=message)
 
+@app.get('/users/<int:user_id>/likes')
+def show_liked_messages(user_id):
+    """Show list of followers of this user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user)
+
 
 ##############################################################################
 # Homepage and error pages

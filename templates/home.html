@@ -54,6 +54,9 @@
           <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
           <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
           <p>{{ msg.text }}</p>
+          {% if msg.is_liked_by_user(g.user) %}
+          <div><i class="bi bi-arrow-through-heart-fill"></i></div>
+          {%endif%}
         </div>
 
 

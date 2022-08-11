@@ -21,6 +21,9 @@
             </span>
         <p>{{ message.text }}</p>
       </div>
+      {% if message.is_liked_by_user(g.user) %}
+          <div><i class="bi bi-arrow-through-heart-fill"></i></div>
+          {%endif%}
     </li>
 
     {% endfor %}
