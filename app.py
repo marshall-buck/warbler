@@ -415,7 +415,7 @@ def homepage():
         user_id_list.append(g.user.id)  # can use plus(+) (g.user.id) on 361
         messages = (Message
                     .query
-                    .filter(Message.user_id.in_(user_id_list))
+                    # .filter(Message.user_id.in_(user_id_list))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
