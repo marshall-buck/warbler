@@ -16,7 +16,7 @@ class Follows(db.Model):
     """Connection of a follower <-> followed_user."""
 
     __tablename__ = 'follows'
-    #ondelete casacade can be dangerous (deleting foreign key will delete the table with primary key)
+    # ondelete casacade can be dangerous (deleting foreign key will delete the table with primary key)
     # composite primary key cause Kadeem can't follow Marshall twice
     user_being_followed_id = db.Column(
         db.Integer,
@@ -164,7 +164,7 @@ class Message(db.Model):
         nullable=False,
         default=datetime.utcnow,
     )
-    #TODO: ondelete cascade here too
+    # TODO: on delete cascade here too
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete='CASCADE'),
@@ -177,27 +177,30 @@ class Message(db.Model):
         backref="liked_messages",
     )
 
+    def is_liked_by_user(self, user):
+        """ Checks if message is liked by user returns bool"""
+        # message_ids = [message.id for message in user.liked_messages]
+        if self.id in [message.id for message in user.liked_messages]:
+            return True
+
+        return False
+
+
 """
 Join table between users and messages called likes
 Will contain 2 foreign keys: user_id and message_id.
 Each row of the table represents the relationship between one user and one message.
 """
+
+
 class Like(db.Model):
     """Mapping of a a liked message to an user"""
     __tablename__ = "likes"
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    message_id = db.Column(db.Integer, db.ForeignKey('messages.id'), primary_key=True)
-
-
-
-
-
-
-
-
-
-
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        'users.id'), primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey(
+        'messages.id'), primary_key=True)
 
 
 def connect_db(app):

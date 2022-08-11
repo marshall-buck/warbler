@@ -31,16 +31,17 @@ connect_db(app)
 ##############################################################################
 # User signup/login/logout
 
-@app.before_request  # runs before every single request, Flask run each of them in order every route
+# runs before every single request, Flask run each of them in order every route
+@app.before_request
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
 
-
     else:
         g.user = None
+
 
 @app.before_request
 def add_form_to_g():
@@ -255,10 +256,9 @@ def profile():
 
             except IntegrityError:
                 flash("Username already taken", 'danger')
-                #TODO: clarification on rollback
+                # TODO: clarification on rollback
                 db.session.rollback()
                 return render_template('users/edit.html', form=form)
-
 
             return redirect(f'/users/{g.user.id}')
 
@@ -269,7 +269,7 @@ def profile():
     return render_template('users/edit.html', form=form)
 
 
-
+# TODO: Check out functionality
 @app.post('/users/delete')
 def delete_user():
     """Delete user.
@@ -353,21 +353,39 @@ def delete_message(message_id):
 
 
 """
+
+
 @app.post("/like/<int:message_id>")
 def like_message(message_id):
     """Like a message
     """
-    # check if message is already liked
-    # query message using message id
-    # check if it's in g.user.liked_messages
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
-    # 
+    message = Message.query.get_or_404(message_id)
+
+    g.user.liked_messages.append(message)
+    db.session.commit()
+
+    return render_template('messages/show.html', message=message)
 
 
+@app.post("/unlike/<int:message_id>")
+def unlike_message(message_id):
+    """UnLike a message
+    """
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
+    message = Message.query.get_or_404(message_id)
 
+    g.user.liked_messages.remove(message)
 
+    db.session.commit()
 
+    return render_template('messages/show.html', message=message)
 
 
 ##############################################################################
@@ -383,7 +401,7 @@ def homepage():
     """
     if g.user:
         user_id_list = [user.id for user in g.user.following]
-        user_id_list.append(g.user.id) # can use plus(+) (g.user.id) on 361
+        user_id_list.append(g.user.id)  # can use plus(+) (g.user.id) on 361
         messages = (Message
                     .query
                     .filter(Message.user_id.in_(user_id_list))
