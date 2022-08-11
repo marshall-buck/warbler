@@ -353,8 +353,15 @@ def delete_message(message_id):
 
 
 """
+@app.post("/like/<int:message_id>")
+def like_message(message_id):
+    """Like a message
+    """
+    # check if message is already liked
+    # query message using message id
+    # check if it's in g.user.liked_messages
 
-
+    # 
 
 
 
