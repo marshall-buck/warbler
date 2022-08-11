@@ -6,6 +6,7 @@
 
 
 import os
+from sqlite3 import IntegrityError
 from unittest import TestCase
 
 from models import db, User, Message, Follows
@@ -25,11 +26,15 @@ from app import app
 # once for all tests --- in each test, we'll delete the data
 # and create fresh new clean test data
 
+db.drop_all()
+
 db.create_all()
 
 
 class UserModelTestCase(TestCase):
+    """Test for model of User"""
     def setUp(self):
+        """Make demo data"""
         User.query.delete()
 
         u1 = User.signup("u1", "u1@email.com", "password", None)
@@ -42,11 +47,83 @@ class UserModelTestCase(TestCase):
         self.client = app.test_client()
 
     def tearDown(self):
+        """Clean up fouled transactions"""
         db.session.rollback()
 
     def test_user_model(self):
+        """ User should have no messages & no followers"""
         u1 = User.query.get(self.u1_id)
 
-        # User should have no messages & no followers
         self.assertEqual(len(u1.messages), 0)
         self.assertEqual(len(u1.followers), 0)
+
+    def test_repr_method(self):
+        """Does the repr method work as expected?"""
+        u1 = User.query.get(self.u1_id)
+        self.assertIn("u1@email.com", u1.__repr__())
+
+
+    def test_following(self):
+        """ Does is_following successfully detect when user1 is following user2?"""
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+        u2.followers.append(u1)
+        db.session.commit()
+
+        self.assertTrue(u1.is_following(u2))
+        self.assertEqual(len(u2.followers), 1)
+
+
+    def test_not_following(self):
+        """Does is_following successfully detect when user1 is not following user2?"""
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+        u2.followers.append(u1)
+        db.session.commit()
+        u2.followers.remove(u1)
+        db.session.commit()
+
+        self.assertFalse(u1.is_following(u2))
+        self.assertEqual(len(u2.followers), 0)
+
+    def test_is_followed_by(self):
+        """ Does is_followed_by successfully detect when user1 is followed by user2?"""
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+        u1.followers.append(u2)
+        db.session.commit()
+
+        self.assertTrue(u1.is_followed_by(u2))
+        self.assertEqual(len(u1.followers), 1)
+
+    def test_is_not_followed_by(self):
+        """Does is_followed_by successfully detect when user1 is not followed by user2?"""
+        u1 = User.query.get(self.u1_id)
+        u2 = User.query.get(self.u2_id)
+        u1.followers.append(u2)
+        db.session.commit()
+        u1.followers.remove(u2)
+        db.session.commit()
+
+        self.assertFalse(u1.is_followed_by(u2))
+        self.assertEqual(len(u1.followers), 0)
+
+    def test_sign_up(self):
+        """ Does User.signup successfully create a new user given valid credentials?"""
+        # TODO: maybe a different approach?
+        u1 = User.query.get(self.u1_id)
+        self.assertIsNotNone(u1)
+
+    # def test_fail_sign_up(self):
+        """ Does User.signup fail to create a new user if any of the validations (eg uniqueness, non-nullable fields) fail?"""
+        #TODO: come back to this!
+        # with self.assertRaises(IntegrityError) as context:
+        #     u3 = User.signup("u1", "u1@email.com", "password", None)
+        #     db.session.commit()
+        # self.assertNotIsInstance(u3, User)
+
+# Does User.authenticate successfully return a user when given a valid username and password?
+
+# Does User.authenticate fail to return a user when the username is invalid?
+
+# Does User.authenticate fail to return a user when the password is invalid?
