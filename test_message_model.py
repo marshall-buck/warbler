@@ -73,10 +73,22 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(m2.user_id, self.u1_id)
 
         self.assertEqual(len(u1.messages), 2)
-# FIXME: separate liking and unliking
 
     def test_liking_message(self):
-        """test is_liked_by_user method when user likes and un-likes a message"""
+        """test is_liked_by_user method when user likes  a message"""
+
+        m1 = Message.query.get(self.m1_id)
+        u2 = User.query.get(self.u2_id)
+        u1 = User.query.get(self.u1_id)
+
+        u2.liked_messages.append(m1)
+        db.session.commit()
+
+        self.assertTrue(m1.is_liked_by_user(u2))
+        self.assertFalse(m1.is_liked_by_user(u1))
+
+    def test_unliking_message(self):
+        """test is_liked_by_user method when user un-likes a message"""
 
         m1 = Message.query.get(self.m1_id)
         u2 = User.query.get(self.u2_id)
@@ -93,7 +105,11 @@ class MessageModelTestCase(TestCase):
         db.session.commit()
         self.assertFalse(m1.is_liked_by_user(u2))
 
-# TODO How to check database errors
+    # TODO:test is user can like own message
+    # def test_user_cant_like_own_message(self):
+    #     """Tests if user can like own message"""
 
+    #     m1 = Message.query.get(self.m1_id)
+    #     u1 = User.query.get(self.u1_id)
 
-# TODO:check timestamp? how?
+    #     u1.liked_messages.append(m1)
