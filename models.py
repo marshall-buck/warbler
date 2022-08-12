@@ -164,7 +164,7 @@ class Message(db.Model):
         nullable=False,
         default=datetime.utcnow,
     )
-    # TODO: on delete cascade here too
+
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete='CASCADE')

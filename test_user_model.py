@@ -5,6 +5,7 @@
 #    python -m unittest test_user_model.py
 
 
+from app import app
 import os
 from sqlite3 import IntegrityError
 from unittest import TestCase
@@ -20,7 +21,6 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 # Now we can import app
 
-from app import app
 
 # Create our tables (we do this here, so we only create the tables
 # once for all tests --- in each test, we'll delete the data
@@ -33,6 +33,7 @@ db.create_all()
 
 class UserModelTestCase(TestCase):
     """Test for model of User"""
+
     def setUp(self):
         """Make demo data"""
         User.query.delete()
@@ -62,7 +63,6 @@ class UserModelTestCase(TestCase):
         u1 = User.query.get(self.u1_id)
         self.assertIn("u1@email.com", u1.__repr__())
 
-
     def test_following(self):
         """ Does is_following successfully detect when user1 is following user2?"""
         u1 = User.query.get(self.u1_id)
@@ -72,7 +72,6 @@ class UserModelTestCase(TestCase):
 
         self.assertTrue(u1.is_following(u2))
         self.assertEqual(len(u2.followers), 1)
-
 
     def test_not_following(self):
         """Does is_following successfully detect when user1 is not following user2?"""
@@ -116,14 +115,15 @@ class UserModelTestCase(TestCase):
 
     # def test_fail_sign_up(self):
         """ Does User.signup fail to create a new user if any of the validations (eg uniqueness, non-nullable fields) fail?"""
-        #TODO: come back to this!
+        # TODO: come back to this!
         # with self.assertRaises(IntegrityError) as context:
         #     u3 = User.signup("u1", "u1@email.com", "password", None)
         #     db.session.commit()
         # self.assertNotIsInstance(u3, User)
 
-# Does User.authenticate successfully return a user when given a valid username and password?
-
-# Does User.authenticate fail to return a user when the username is invalid?
-
-# Does User.authenticate fail to return a user when the password is invalid?
+    def test_successful_auth(self):
+        """# Tests user authentication"""
+        u1 = User.query.get(self.u1_id)
+        self.assertIsInstance(u1.authenticate('u1', 'password'), User)
+        self.assertFalse(u1.authenticate('u1', 'passsadfasdfword'))
+        self.assertFalse(u1.authenticate('u111', 'password'))

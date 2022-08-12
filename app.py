@@ -269,7 +269,7 @@ def profile():
     return render_template('users/edit.html', form=form)
 
 
-# TODO: Check out functionality
+# FIXME: Check out functionality
 @app.post('/users/delete')
 def delete_user():
     """Delete user.
@@ -278,26 +278,18 @@ def delete_user():
 
     method app.route(get, method)
     form.validate_on_submit
-
-
-
-
-
-
-
-
-
-
     """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    do_logout()
+    if g.csrf_form.validate_on_submit():
 
-    db.session.delete(g.user)
-    db.session.commit()
+        do_logout()
+
+        db.session.delete(g.user)
+        db.session.commit()
 
     return redirect("/signup")
 
@@ -379,7 +371,7 @@ def like_message(message_id):
         return redirect("/")
 
     message = Message.query.get_or_404(message_id)
-    #check if message is already liked
+    # check if message is already liked
     g.user.liked_messages.append(message)
     db.session.commit()
 
@@ -403,6 +395,7 @@ def unlike_message(message_id):
     db.session.commit()
 
     return render_template('messages/show.html', message=message)
+
 
 @app.get('/users/<int:user_id>/likes')
 def show_liked_messages(user_id):
