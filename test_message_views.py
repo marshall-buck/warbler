@@ -79,9 +79,21 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertIn("u1", html)
             self.assertIsNotNone(msg)
 
+    def test_add_message_logout_user(self):
+        """ test logged out user can't add message"""
 
-#     @app.get('/messages/<int:message_id>')
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
 
+            c.post("/logout", follow_redirects=True)
+
+            resp = c.post("/messages/new",
+                          data={"text": "Hello"}, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
 
     def test_show_message(self):
         """test that a message shows"""
@@ -109,6 +121,22 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertNotIn("m1-text", html)
             msg = Message.query.get(self.m1_id)
             self.assertIsNone(msg)
+
+    def test_delete_message_logout_user(self):
+        """ test logged out user can't delete message"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            c.post("/logout", follow_redirects=True)
+
+            resp = c.post(
+                f"/messages/{self.m1_id}/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
 
     def test_like_message(self):
         """test that user can like a message"""
@@ -160,34 +188,8 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("m1-text", html)
 
-    def test_add_message_logout_user(self):
-        """ test logged out user can't add message"""
-
+    def test_user_add_message_other_user(self):
+        """tests if user can add a message to other user"""
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u1_id
-
-            c.post("/logout", follow_redirects=True)
-
-            resp = c.post("/messages/new",
-                          data={"text": "Hello"}, follow_redirects=True)
-            html = resp.get_data(as_text=True)
-
-            self.assertEqual(resp.status_code, 200)
-            self.assertIn("Access unauthorized.", html)
-
-    def test_delete_message_logout_user(self):
-        """ test logged out user can't delete message"""
-
-        with self.client as c:
-            with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.u1_id
-
-            c.post("/logout", follow_redirects=True)
-
-            resp = c.post(
-                f"/messages/{self.m1_id}/delete", follow_redirects=True)
-            html = resp.get_data(as_text=True)
-
-            self.assertEqual(resp.status_code, 200)
-            self.assertIn("Access unauthorized.", html)

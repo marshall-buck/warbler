@@ -298,28 +298,6 @@ def delete_user():
 ##############################################################################
 # Messages routes:
 
-@app.route('/messages/new', methods=["GET", "POST"])
-def add_message():
-    """Add a message:
-
-    Show form if GET. If valid, update message and redirect to user page.
-    """
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    form = MessageForm()
-
-    if form.validate_on_submit():
-        msg = Message(text=form.text.data)
-        g.user.messages.append(msg)
-        db.session.commit()
-
-        return redirect(f"/users/{g.user.id}")
-
-    return render_template('messages/create.html', form=form)
-
 
 @app.get('/messages/<int:message_id>')
 def show_message(message_id):
