@@ -256,7 +256,6 @@ def profile():
 
             except IntegrityError:
                 flash("Username already taken", 'danger')
-                # TODO: clarification on rollback
                 db.session.rollback()
                 return render_template('users/edit.html', form=form)
 
@@ -269,7 +268,6 @@ def profile():
     return render_template('users/edit.html', form=form)
 
 
-# FIXME: Check out functionality
 @app.post('/users/delete')
 def delete_user():
     """Delete user.
@@ -341,64 +339,55 @@ def delete_message(message_id):
 
     Check that this message was written by the current user.
     Redirect to user page on success.
-    TODO: CSRF
     """
-
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get_or_404(message_id)
-    db.session.delete(msg)
-    db.session.commit()
 
-    return redirect(f"/users/{g.user.id}")
+    if g.csrf_form.validate_on_submit():
+        msg = Message.query.get_or_404(message_id)
+        db.session.delete(msg)
+        db.session.commit()
+        return redirect(f"/users/{g.user.id}")
 
+    return redirect("/")
 
-"""Places where messages appear:
-- homepage
-- another user's homepage
-
-
-
-"""
 
 
 @app.post("/like/<int:message_id>")
 def like_message(message_id):
     """Like a message
-    TODO: CSRF
     """
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    message = Message.query.get_or_404(message_id)
-    # check if message is already liked
-    g.user.liked_messages.append(message)
-    db.session.commit()
-
-    return render_template('messages/show.html', message=message)
+    if g.csrf_form.validate_on_submit():
+        message = Message.query.get_or_404(message_id)
+        # check if message is already liked
+        g.user.liked_messages.append(message)
+        db.session.commit()
+        return render_template('messages/show.html', message=message)
+    return redirect("/")
 
 
 @app.post("/unlike/<int:message_id>")
 def unlike_message(message_id):
     """UnLike a message
-
-    TODO: CSRF
     """
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    message = Message.query.get_or_404(message_id)
+    if g.csrf_form.validate_on_submit():
+        message = Message.query.get_or_404(message_id)
 
-    g.user.liked_messages.remove(message)
+        g.user.liked_messages.remove(message)
 
-    db.session.commit()
-
-    return render_template('messages/show.html', message=message)
-
+        db.session.commit()
+        return render_template('messages/show.html', message=message)
+    return redirect("/")
 
 @app.get('/users/<int:user_id>/likes')
 def show_liked_messages(user_id):

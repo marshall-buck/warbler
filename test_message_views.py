@@ -39,13 +39,16 @@ class MessageBaseViewTestCase(TestCase):
         User.query.delete()
 
         u1 = User.signup("u1", "u1@email.com", "password", None)
+        u2 = User.signup("u2", "u2@email.com", "password", None)
         db.session.flush()
 
         m1 = Message(text="m1-text", user_id=u1.id)
+
         db.session.add_all([m1])
         db.session.commit()
 
         self.u1_id = u1.id
+        self.u2_is = u2.id
         self.m1_id = m1.id
 
         self.client = app.test_client()
@@ -72,9 +75,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertIn("Hello", html)
             self.assertIn("u1", html)
             self.assertIsNotNone(msg)
-
-
-
 
 
 #     @app.get('/messages/<int:message_id>')
@@ -109,7 +109,14 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.post("/like/<int:message_id>")
-# def like_message(message_id):
+    def like_message(self):
+        """test that user can like a message"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u2_id
+
+        resp = c.post(f"/like/{self.m1_id}")
+        
 
 
 #     @app.post("/unlike/<int:message_id>")
