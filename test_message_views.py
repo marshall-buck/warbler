@@ -8,7 +8,7 @@
 import os
 from unittest import TestCase
 
-from models import db, Message, User
+from models import db, Message, User, Like
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -36,6 +36,8 @@ app.config['WTF_CSRF_ENABLED'] = False
 
 class MessageBaseViewTestCase(TestCase):
     def setUp(self):
+        Like.query.delete()
+        Message.query.delete()
         User.query.delete()
 
         u1 = User.signup("u1", "u1@email.com", "password", None)
@@ -48,7 +50,7 @@ class MessageBaseViewTestCase(TestCase):
         db.session.commit()
 
         self.u1_id = u1.id
-        self.u2_is = u2.id
+        self.u2_id = u2.id
         self.m1_id = m1.id
 
         self.client = app.test_client()
@@ -109,14 +111,18 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.post("/like/<int:message_id>")
-    def like_message(self):
+    def test_like_message(self):
         """test that user can like a message"""
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u2_id
 
-        resp = c.post(f"/like/{self.m1_id}")
-        
+            resp = c.post(f"/like/{self.m1_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Unlike", html)
+
 
 
 #     @app.post("/unlike/<int:message_id>")
