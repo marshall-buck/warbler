@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div id="warbler-hero" class="mb-3 full-width">
   <img src="{{user.header_image_url}}" alt="" class="img-fluid">
 </div>
@@ -62,10 +61,12 @@
             {% elif g.user %}
             {% if g.user.is_following(user) %}
             <form method="POST" action="/users/stop-following/{{ user.id }}">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-primary">Unfollow</button>
             </form>
             {% else %}
             <form method="POST" action="/users/follow/{{ user.id }}">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-primary">Follow</button>
             </form>
             {% endif %}

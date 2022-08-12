@@ -207,11 +207,13 @@ def start_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get_or_404(follow_id)
-    g.user.following.append(followed_user)
-    db.session.commit()
+    if g.csrf_form.validate_on_submit():
+        followed_user = User.query.get_or_404(follow_id)
+        g.user.following.append(followed_user)
+        db.session.commit()
+        return redirect(f"/users/{g.user.id}/following")
 
-    return redirect(f"/users/{g.user.id}/following")
+    return redirect("/")
 
 
 @app.post('/users/stop-following/<int:follow_id>')
@@ -225,12 +227,13 @@ def stop_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get(follow_id)
-    g.user.following.remove(followed_user)
-    db.session.commit()
+    if g.csrf_form.validate_on_submit():
+        followed_user = User.query.get(follow_id)
+        g.user.following.remove(followed_user)
+        db.session.commit()
+        return redirect(f"/users/{g.user.id}/following")
 
-    return redirect(f"/users/{g.user.id}/following")
-
+    return redirect("/")
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
@@ -297,6 +300,26 @@ def delete_user():
 
 ##############################################################################
 # Messages routes:
+
+@app.route('/messages/new', methods=["GET", "POST"])
+def add_message():
+    """Add a message:
+    Show form if GET. If valid, update message and redirect to user page.
+    """
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    form = MessageForm()
+    if form.validate_on_submit():
+        msg = Message(text=form.text.data)
+        g.user.messages.append(msg)
+        db.session.commit()
+        return redirect(f"/users/{g.user.id}")
+    return render_template('messages/create.html', form=form)
+
+
+
+
 
 
 @app.get('/messages/<int:message_id>')

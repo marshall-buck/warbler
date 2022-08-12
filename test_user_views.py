@@ -157,28 +157,119 @@ class UserActionFollowTestCase(UserBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("u2", html)
 
-    def test_start_following(self):
+    def test_stop_following(self):
         """test if user can follow another user"""
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u1_id
 
+            c.post(f'/users/follow/{self.u2_id}', follow_redirects = True)
+            resp = c.post(f'/users/stop-following/{self.u2_id}', follow_redirects = True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn("u2", html)
+
+    def test_start_following_logout(self):
+        """test if user can follow another user"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            c.post("/logout", follow_redirects=True)
             resp = c.post(f'/users/follow/{self.u2_id}', follow_redirects = True)
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("u2", html)
+            self.assertIn("Access unauthorized.", html)
 
-# @app.post('/users/stop-following/<int:follow_id>')
-# def stop_following(follow_id):
+    def test_stop_following_logout(self):
+        """test if user can follow another user"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
 
-# @app.route('/users/profile', methods=["GET", "POST"])
-# def profile():
+            c.post(f'/users/follow/{self.u2_id}', follow_redirects = True)
+            c.post("/logout", follow_redirects=True)
+            resp = c.post(f'/users/stop-following/{self.u2_id}', follow_redirects = True)
+            html = resp.get_data(as_text=True)
 
-# @app.post('/users/delete')
-# def delete_user():
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
 
-# When you’re logged in, can you see the follower / following pages for any user?
+
+
+class UserActionSelfTestCase(UserBaseViewTestCase):
+
+    def test_profile(self):
+        """test if user can update profile when logged in"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+            user = User.query.get(self.u1_id)
+            user.location = "Alaska"
+            db.session.commit()
+            resp = c.post("/users/profile", follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Alaska", html )
+
+
+    def test_profile_other_user(self):
+        """test if user can update another user's profile"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.get(f"/users/{self.u2_id}", follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn("Edit", html)
+
+
+    def test_profile_logout(self):
+        """test if user can update profile when logged out"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            c.post("/logout", follow_redirects=True)
+            resp = c.post("/users/profile", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
+
+    def test_delete_user(self):
+        """test if user can delete account when logged in"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post("/users/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Sign up", html)
+
+    def test_delete_user_logout(self):
+        """test if user can delete account when logged out"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            c.post("/logout", follow_redirects=True)
+            resp = c.post("/users/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
 
 
 
