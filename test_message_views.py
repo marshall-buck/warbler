@@ -95,10 +95,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("m1-text", html)
 
-
-#     @app.post('/messages/<int:message_id>/delete')
-
-
     def test_delete_message(self):
         """test that user can delete a message and it doesn't show up on user's page"""
         with self.client as c:
@@ -114,10 +110,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             msg = Message.query.get(self.m1_id)
             self.assertIsNone(msg)
 
-
-#     @app.post("/like/<int:message_id>")
-
-
     def test_like_message(self):
         """test that user can like a message"""
         with self.client as c:
@@ -129,10 +121,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Unlike", html)
-
-
-#     @app.post("/unlike/<int:message_id>")
-
 
     def test_unlike_message(self):
         """test that user can unlike message"""
@@ -153,9 +141,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertNotIn("Unlike", html)
 
-
-#     @app.get('/users/<int:user_id>/likes')
-
     def test_show_liked_messages(self):
         """ test showing liked messages from user"""
 
@@ -163,7 +148,6 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u2_id
 
-            # set u2 to like a message
             u2 = User.query.get(self.u2_id)
             m1 = Message.query.get(self.m1_id)
 
@@ -175,3 +159,35 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("m1-text", html)
+
+    def test_add_message_logout_user(self):
+        """ test logged out user can't add message"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            c.post("/logout", follow_redirects=True)
+
+            resp = c.post("/messages/new",
+                          data={"text": "Hello"}, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)
+
+    def test_delete_message_logout_user(self):
+        """ test logged out user can't delete message"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            c.post("/logout", follow_redirects=True)
+
+            resp = c.post(
+                f"/messages/{self.m1_id}/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized.", html)

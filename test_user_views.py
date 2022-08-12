@@ -27,7 +27,7 @@
 # When you’re logged out, are you disallowed from visiting a user’s follower / following pages?
 # When you’re logged in, can you add a message as yourself?
 # When you’re logged in, can you delete a message as yourself?
-# When you’re logged out, are you prohibited from adding messages?
+
 # When you’re logged out, are you prohibited from deleting messages?
 # When you’re logged in, are you prohibiting from adding a message as another user?
 # When you’re logged in, are you prohibiting from deleting a message as another user?

@@ -367,6 +367,7 @@ def like_message(message_id):
         g.user.liked_messages.append(message)
         db.session.commit()
         return render_template('messages/show.html', message=message)
+
     return redirect("/")
 
 
