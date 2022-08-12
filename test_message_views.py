@@ -95,6 +95,11 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Access unauthorized.", html)
 
+
+
+
+#TODO: refactor classes for test cases
+
     def test_show_message(self):
         """test that a message shows"""
         with self.client as c:
@@ -188,8 +193,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("m1-text", html)
 
-    def test_user_add_message_other_user(self):
-        """tests if user can add a message to other user"""
-        with self.client as c:
-            with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.u1_id
+
+# TODO: NOT POSSIBLE HERE BUT STH TO THINK ABOUT:
+# When you’re logged in, are you prohibiting from adding a message as another user?
+# When you’re logged in, are you prohibiting from deleting a message as another user?
