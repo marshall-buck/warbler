@@ -53,16 +53,54 @@ class MessageBaseViewTestCase(TestCase):
 
 class MessageAddViewTestCase(MessageBaseViewTestCase):
     def test_add_message(self):
+        """test that a logged in user can create a new message and it's in the database"""
         # Since we need to change the session to mimic logging in,
         # we need to use the changing-session trick:
+
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u1_id
 
             # Now, that session setting is saved, so we can have
             # the rest of ours test
-            resp = c.post("/messages/new", data={"text": "Hello"})
+            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects = True)
+            html = resp.get_data(as_text=True)
 
-            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("u1", html)
 
-            Message.query.filter_by(text="Hello").one()
+            msg = Message.query.filter_by(text="Hello").one()
+            self.assertIsNotNone(msg)
+
+
+
+
+
+#     @app.get('/messages/<int:message_id>')
+    # def test_show_message(self):
+    #     with self.client as c:
+    #         with c.session_transaction() as sess:
+    #             sess[CURR_USER_KEY] = self.u1_id
+
+    #         resp = c.get(f"/messages/{self.m1_id}")
+
+    #         self.assertEqual(resp.status_code, 200)
+    #         html = resp.get_data(as_text=True)
+    #         msg = Message.query.filter_by(text="Hello").one()
+    #         self.assertIsNotNone(msg)
+
+
+#     @app.post('/messages/<int:message_id>/delete')
+# def delete_message(message_id):
+
+
+#     @app.post("/like/<int:message_id>")
+# def like_message(message_id):
+
+
+#     @app.post("/unlike/<int:message_id>")
+# def unlike_message(message_id):
+
+
+#     @app.get('/users/<int:user_id>/likes')
+# def show_liked_messages(user_id):
