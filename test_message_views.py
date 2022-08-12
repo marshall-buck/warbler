@@ -67,9 +67,10 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("u1", html)
-
             msg = Message.query.filter_by(text="Hello").one()
+
+            self.assertIn("Hello", html)
+            self.assertIn("u1", html)
             self.assertIsNotNone(msg)
 
 
@@ -77,17 +78,17 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.get('/messages/<int:message_id>')
-    # def test_show_message(self):
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.u1_id
+    def test_show_message(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
 
-    #         resp = c.get(f"/messages/{self.m1_id}")
+            resp = c.get(f"/messages/{self.m1_id}")
 
-    #         self.assertEqual(resp.status_code, 200)
-    #         html = resp.get_data(as_text=True)
-    #         msg = Message.query.filter_by(text="Hello").one()
-    #         self.assertIsNotNone(msg)
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            msg = Message.query.filter_by(text="Hello").one()
+            self.assertIsNotNone(msg)
 
 
 #     @app.post('/messages/<int:message_id>/delete')
