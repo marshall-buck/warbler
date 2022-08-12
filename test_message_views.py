@@ -5,6 +5,7 @@
 #    FLASK_ENV=production python -m unittest test_message_views.py
 
 
+from app import app, CURR_USER_KEY
 import os
 from unittest import TestCase
 
@@ -19,7 +20,6 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
 
 # Now we can import app
 
-from app import app, CURR_USER_KEY
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -68,7 +68,8 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
             # Now, that session setting is saved, so we can have
             # the rest of ours test
-            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects = True)
+            resp = c.post("/messages/new",
+                          data={"text": "Hello"}, follow_redirects=True)
             html = resp.get_data(as_text=True)
 
             msg = Message.query.filter_by(text="Hello").one()
@@ -80,6 +81,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.get('/messages/<int:message_id>')
+
     def test_show_message(self):
         """test that a message shows"""
         with self.client as c:
@@ -90,17 +92,19 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("m1-text",html)
+            self.assertIn("m1-text", html)
 
 
 #     @app.post('/messages/<int:message_id>/delete')
+
     def test_delete_message(self):
         """test that user can delete a message and it doesn't show up on user's page"""
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u1_id
 
-            resp = c.post(f'/messages/{self.m1_id}/delete', follow_redirects = True)
+            resp = c.post(
+                f'/messages/{self.m1_id}/delete', follow_redirects=True)
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
@@ -109,8 +113,8 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertIsNone(msg)
 
 
-
 #     @app.post("/like/<int:message_id>")
+
     def test_like_message(self):
         """test that user can like a message"""
         with self.client as c:
@@ -124,9 +128,26 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             self.assertIn("Unlike", html)
 
 
-
 #     @app.post("/unlike/<int:message_id>")
-# def unlike_message(message_id):
+
+    def test_unlike_message(self):
+        """test that user can unlike message"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u2_id
+
+            u2 = User.query.get(self.u2_id)
+            m1 = Message.query.get(self.m1_id)
+
+            u2.liked_messages.append(m1)
+            db.session.commit()
+
+            resp = c.post(f"/unlike/{self.m1_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn("Unlike", html)
 
 
 #     @app.get('/users/<int:user_id>/likes')
