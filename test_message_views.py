@@ -66,9 +66,9 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
             resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects = True)
             html = resp.get_data(as_text=True)
 
-            self.assertEqual(resp.status_code, 200)
             msg = Message.query.filter_by(text="Hello").one()
 
+            self.assertEqual(resp.status_code, 200)
             self.assertIn("Hello", html)
             self.assertIn("u1", html)
             self.assertIsNotNone(msg)
@@ -79,20 +79,33 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 #     @app.get('/messages/<int:message_id>')
     def test_show_message(self):
+        """test that a message shows"""
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.u1_id
 
             resp = c.get(f"/messages/{self.m1_id}")
+            html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            html = resp.get_data(as_text=True)
-            msg = Message.query.filter_by(text="Hello").one()
-            self.assertIsNotNone(msg)
+            self.assertIn("m1-text",html)
 
 
 #     @app.post('/messages/<int:message_id>/delete')
-# def delete_message(message_id):
+    def test_delete_message(self):
+        """test that user can delete a message and it doesn't show up on user's page"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            resp = c.post(f'/messages/{self.m1_id}/delete', follow_redirects = True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn("m1-text", html)
+            msg = Message.query.get(self.m1_id)
+            self.assertIsNone(msg)
+
 
 
 #     @app.post("/like/<int:message_id>")
