@@ -82,6 +82,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 #     @app.get('/messages/<int:message_id>')
 
+
     def test_show_message(self):
         """test that a message shows"""
         with self.client as c:
@@ -96,6 +97,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.post('/messages/<int:message_id>/delete')
+
 
     def test_delete_message(self):
         """test that user can delete a message and it doesn't show up on user's page"""
@@ -115,6 +117,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 #     @app.post("/like/<int:message_id>")
 
+
     def test_like_message(self):
         """test that user can like a message"""
         with self.client as c:
@@ -129,6 +132,7 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.post("/unlike/<int:message_id>")
+
 
     def test_unlike_message(self):
         """test that user can unlike message"""
@@ -151,4 +155,23 @@ class MessageAddViewTestCase(MessageBaseViewTestCase):
 
 
 #     @app.get('/users/<int:user_id>/likes')
-# def show_liked_messages(user_id):
+
+    def test_show_liked_messages(self):
+        """ test showing liked messages from user"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u2_id
+
+            # set u2 to like a message
+            u2 = User.query.get(self.u2_id)
+            m1 = Message.query.get(self.m1_id)
+
+            u2.liked_messages.append(m1)
+            db.session.commit()
+
+            resp = c.get(f"/users/{self.u2_id}/likes")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("m1-text", html)

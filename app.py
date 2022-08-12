@@ -344,7 +344,6 @@ def delete_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-
     if g.csrf_form.validate_on_submit():
         msg = Message.query.get_or_404(message_id)
         db.session.delete(msg)
@@ -352,7 +351,6 @@ def delete_message(message_id):
         return redirect(f"/users/{g.user.id}")
 
     return redirect("/")
-
 
 
 @app.post("/like/<int:message_id>")
@@ -389,9 +387,10 @@ def unlike_message(message_id):
         return render_template('messages/show.html', message=message)
     return redirect("/")
 
+
 @app.get('/users/<int:user_id>/likes')
 def show_liked_messages(user_id):
-    """Show list of followers of this user."""
+    """Show list of liked messages."""
 
     if not g.user:
         flash("Access unauthorized.", "danger")
