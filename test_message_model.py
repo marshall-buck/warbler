@@ -73,6 +73,7 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(m2.user_id, self.u1_id)
 
         self.assertEqual(len(u1.messages), 2)
+# FIXME: separate liking and unliking
 
     def test_liking_message(self):
         """test is_liked_by_user method when user likes and un-likes a message"""

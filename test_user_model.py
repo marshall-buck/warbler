@@ -7,7 +7,7 @@
 
 from app import app
 import os
-from sqlite3 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 from unittest import TestCase
 
 from models import db, User, Message, Follows
@@ -109,17 +109,16 @@ class UserModelTestCase(TestCase):
 
     def test_sign_up(self):
         """ Does User.signup successfully create a new user given valid credentials?"""
-        # TODO: maybe a different approach?
+
         u1 = User.query.get(self.u1_id)
         self.assertIsNotNone(u1)
 
-    # def test_fail_sign_up(self):
+    def test_fail_sign_up(self):
         """ Does User.signup fail to create a new user if any of the validations (eg uniqueness, non-nullable fields) fail?"""
-        # TODO: come back to this!
-        # with self.assertRaises(IntegrityError) as context:
-        #     u3 = User.signup("u1", "u1@email.com", "password", None)
-        #     db.session.commit()
-        # self.assertNotIsInstance(u3, User)
+
+        with self.assertRaises(IntegrityError):
+            u3 = User.signup("u1", "u1@email.com", "password", None)
+            db.session.commit()
 
     def test_successful_auth(self):
         """# Tests user authentication"""

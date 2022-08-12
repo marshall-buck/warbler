@@ -291,7 +291,10 @@ def delete_user():
         db.session.delete(g.user)
         db.session.commit()
 
-    return redirect("/signup")
+        return redirect("/signup")
+
+    else:
+        return redirect(f'/users/{g.user.id}')
 
 
 ##############################################################################
